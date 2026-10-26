@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import pytest
@@ -62,6 +63,8 @@ def index() -> ManifestIndex:
 
 @pytest.fixture
 def home(tmp_path, monkeypatch) -> Path:
+    if sys.platform == "win32":
+        pytest.skip("the fake Steam/XDG layout is Linux-specific")
     home = tmp_path / "home"
     steam = home / ".local" / "share" / "Steam"
     library2 = tmp_path / "sdcard" / "SteamLibrary"

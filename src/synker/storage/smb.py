@@ -21,7 +21,7 @@ class SmbStorage(Storage):
         except ImportError as exc:  # pragma: no cover
             raise StorageError("the 'smbprotocol' package is not installed") from exc
         self._smb = smbclient
-        self._exc = (SMBException, OSError)
+        self._exc = (SMBException, OSError, ValueError)
         self.cfg = cfg
         self.base = f"\\\\{cfg.host}\\{cfg.share}"
         sub = cfg.path.strip("/\\").replace("/", "\\")
@@ -33,9 +33,9 @@ class SmbStorage(Storage):
         try:
             smbclient.register_session(cfg.host, username=username, password=password, port=cfg.port,
                                        encrypt=cfg.encrypt or None, connection_timeout=timeout)
-        except self._exc as exc:
+        except Exception as exc:  # smbprotocol raises ValueError, SMBException, OSError...
             raise StorageError(f"cannot connect to {cfg.host}: {exc}") from exc
-        self._username = username
+        self._kw = {"port": cfg.port, "username": username, "password": password}
 
     def describe(self) -> str:
         return "smb:" + self.base.replace("\\", "/")
@@ -48,13 +48,13 @@ class SmbStorage(Storage):
 
     def exists(self, path: str) -> bool:
         try:
-            return self._smb.path.exists(self._p(path))
+            return self._smb.path.exists(self._p(path), **self._kw)
         except self._exc as exc:
             raise StorageError(str(exc)) from exc
 
     def list(self, path: str) -> list[str]:
         try:
-            return sorted(self._smb.listdir(self._p(path)))
+            return sorted(self._smb.listdir(self._p(path), **self._kw))
         except FileNotFoundError:
             return []
         except self._exc as exc:
@@ -62,7 +62,7 @@ class SmbStorage(Storage):
 
     def open_read(self, path: str) -> BinaryIO:
         try:
-            return self._smb.open_file(self._p(path), mode="rb")
+            return self._smb.open_file(self._p(path), mode="rb", **self._kw)
         except FileNotFoundError as exc:
             raise StorageError(f"not found: {path}") from exc
         except self._exc as exc:
@@ -73,22 +73,22 @@ class SmbStorage(Storage):
         parent = target.rsplit("\\", 1)[0]
         tmp = target + ".part"
         try:
-            self._smb.makedirs(parent, exist_ok=True)
-            with self._smb.open_file(tmp, mode="wb") as dst:
+            self._smb.makedirs(parent, exist_ok=True, **self._kw)
+            with self._smb.open_file(tmp, mode="wb", **self._kw) as dst:
                 shutil.copyfileobj(src, dst, 1 << 20)
-            self._smb.replace(tmp, target)
+            self._smb.replace(tmp, target, **self._kw)
         except self._exc as exc:
             raise StorageError(f"cannot write {path}: {exc}") from exc
 
     def delete(self, path: str) -> None:
         target = self._p(path)
         try:
-            if self._smb.path.isdir(target):
-                for name in self._smb.listdir(target):
+            if self._smb.path.isdir(target, **self._kw):
+                for name in self._smb.listdir(target, **self._kw):
                     self.delete(f"{path}/{name}")
-                self._smb.rmdir(target)
-            elif self._smb.path.exists(target):
-                self._smb.remove(target)
+                self._smb.rmdir(target, **self._kw)
+            elif self._smb.path.exists(target, **self._kw):
+                self._smb.remove(target, **self._kw)
         except self._exc as exc:
             raise StorageError(f"cannot delete {path}: {exc}") from exc
 
