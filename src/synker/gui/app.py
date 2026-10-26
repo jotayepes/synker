@@ -105,7 +105,9 @@ class BackupsDialog(QDialog):
                                               tr("Locked")])
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        header.setStretchLastSection(True)
         layout.addWidget(self.table)
         buttons = QHBoxLayout()
         for label, slot in ((tr("Restore"), self.restore), (tr("Lock / unlock"), self.toggle_lock),
@@ -135,7 +137,7 @@ class BackupsDialog(QDialog):
         self.backups = backups
         self.table.setRowCount(len(backups))
         for row, b in enumerate(backups):
-            values = [b["created_iso"].replace("T", " ")[:19], b["device"], b["reason"], str(b["files"]),
+            values = [b["created_iso"].replace("T", " ")[:19], b["device"], tr(b["reason"]), str(b["files"]),
                       human_size(b["size"]), "✔" if b.get("locked") else ""]
             for col, value in enumerate(values):
                 self.table.setItem(row, col, QTableWidgetItem(value))
@@ -321,13 +323,15 @@ class MainWindow(QMainWindow):
 
     def _show_games(self, result) -> None:
         games, statuses = result
+        # Hide installed games that have no saves, neither here nor on the NAS.
+        games = [g for g in games if g.find_files() or statuses.get(g.id, {}).get("state") not in (None, "empty")]
         self.games = games
         self.table.setRowCount(len(games))
         for row, g in enumerate(games):
             st = statuses.get(g.id, {})
             latest = (st.get("latest") or {}).get("created_iso", "")
             files = g.find_files()
-            values = [g.title, g.source, tr(st.get("state", "")), f"{len(files)} · {human_size(sum(f.size for f in files))}",
+            values = [g.title, tr(g.source), tr(st.get("state", "")), f"{len(files)} · {human_size(sum(f.size for f in files))}",
                       latest.replace("T", " ")[:16]]
             for col, value in enumerate(values):
                 item = QTableWidgetItem(value)

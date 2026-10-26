@@ -57,6 +57,10 @@ const es: Record<string, string> = {
   "Nothing changed": "Sin cambios",
   "files": "archivos",
   "Strict mode launch option": "Opción de lanzamiento (modo estricto)",
+  "exit": "al cerrar",
+  "periodic": "periódico",
+  "manual": "manual",
+  "conflict-copy": "copia de conflicto",
 };
 
 const isEs = (navigator.language || "").toLowerCase().startsWith("es");

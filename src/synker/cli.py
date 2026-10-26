@@ -14,7 +14,7 @@ from typing import Any
 from synker import __version__, autostart, secrets
 from synker import config as config_mod
 from synker.detect.scanner import Game, Scanner
-from synker.engine import Engine
+from synker.engine import EMPTY, Engine
 from synker.manifest import fetch
 from synker.storage import StorageError, open_storage
 
@@ -188,7 +188,11 @@ def cmd_status(ctx: Context) -> Any:
     engine = ctx.engine()
     try:
         games = ctx.games(ctx.args.games, all_games=not ctx.args.games)
-        return [engine.status(g) for g in games]
+        statuses = [engine.status(g) for g in games]
+        if not ctx.args.games:
+            # Installed games without saves locally or on the NAS are just noise in the overview.
+            statuses = [s for s in statuses if s["state"] != EMPTY]
+        return statuses
     finally:
         engine.close()
 

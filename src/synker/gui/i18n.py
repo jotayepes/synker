@@ -80,6 +80,18 @@ ES = {
     "remote-only": "solo en el NAS",
     "empty": "vacío",
     "offline": "NAS no disponible",
+    "steam": "Steam",
+    "steam-shortcut": "Atajo de Steam",
+    "heroic-epic": "Heroic (Epic)",
+    "heroic-gog": "Heroic (GOG)",
+    "lutris": "Lutris",
+    "emulator": "Emulador",
+    "custom": "Personalizado",
+    "detected": "Detectado",
+    "exit": "al cerrar",
+    "periodic": "periódico",
+    "manual": "manual",
+    "conflict-copy": "copia de conflicto",
 }
 
 

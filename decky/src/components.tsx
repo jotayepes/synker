@@ -140,8 +140,8 @@ function GameModal({ status, closeModal }: { status: api.GameStatus; closeModal?
         <Spinner style={{ height: "24px" }} />
       ) : (
         backups.map((b) => (
-          <ButtonItem key={b.id} layout="inline" disabled={busy} label={`${b.created_iso.replace("T", " ")}`}
-            description={`${b.device} · ${b.reason} · ${b.files} ${t("files")} · ${humanSize(b.size)}`}
+          <ButtonItem key={b.id} layout="inline" disabled={busy} label={b.created_iso.slice(0, 19).replace("T", " ")}
+            description={`${b.device} · ${t(b.reason)} · ${b.files} ${t("files")} · ${humanSize(b.size)}${b.locked ? " · 🔒" : ""}`}
             onClick={() => confirmRestore(b)}>
             {t("Restore")}
           </ButtonItem>
