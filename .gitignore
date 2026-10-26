@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# Decky plugin
+decky/node_modules/
+decky/dist/
+decky/bin/
+decky/out/
+decky/.pnpm-store/

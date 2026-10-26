@@ -1,0 +1,11 @@
+{
+  "name": "Synker",
+  "author": "jotayepes",
+  "flags": [],
+  "api_version": 1,
+  "publish": {
+    "tags": ["backup", "saves", "nas", "smb"],
+    "description": "Automatic save game backup and restore to your NAS (SMB) for games and emulators without cloud saves.",
+    "image": "https://opengraph.githubassets.com/1/jotayepes/synker"
+  }
+}

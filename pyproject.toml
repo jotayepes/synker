@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "synker"
+version = "0.1.0"
+description = "Automatic game save backup and restore to a NAS (SMB) or local folder, for Linux, Windows and SteamOS (Decky)."
+readme = "README.md"
+license = { text = "GPL-3.0-or-later" }
+requires-python = ">=3.11"
+authors = [{ name = "jotayepes" }]
+dependencies = [
+  "platformdirs>=4",
+  "tomli-w>=1",
+  "pyyaml>=6",
+  "vdf>=3.4",
+  "smbprotocol>=1.13",
+  "psutil>=5.9",
+]
+
+[project.optional-dependencies]
+gui = ["PySide6>=6.6"]
+keyring = ["keyring>=24"]
+dev = ["pytest>=8", "ruff>=0.5", "pyinstaller>=6"]
+
+[project.scripts]
+synker = "synker.cli:main"
+
+[project.gui-scripts]
+synker-gui = "synker.gui.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+synker = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["smb: integration tests that need a real SMB server (SYNKER_TEST_SMB_* env vars)"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
